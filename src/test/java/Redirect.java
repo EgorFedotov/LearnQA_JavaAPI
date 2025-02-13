@@ -12,6 +12,6 @@ public class Redirect {
                 .andReturn();
 
         String redirectAddress = response.getHeader("x-host");
-        System.out.println("redirect address " + "\n"+ response.getHeader("x-host"));
+        System.out.println("redirect address " + "\n"+ redirectAddress);
     }
 }
