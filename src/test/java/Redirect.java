@@ -15,7 +15,7 @@ public class Redirect {
             Response response = GetRequest(url);
             url = response.getHeader("Location");
             if(url == null){
-                System.out.println("Редиректа нет");
+                System.out.println("Редиректа нет, статус код "+ response.statusCode());
                 break;
             }
             System.out.println("сейчас редиректит вот на этот адресс" + url + " стаус код" + response.statusCode());
