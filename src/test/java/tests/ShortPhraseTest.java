@@ -8,8 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ShortPhraseTest {
 
-    String phrase = "Hello, world";
-
     @ParameterizedTest
     @ValueSource(strings = {"Hello, world", "this is too long a phrase for the test", ""})
     public void testLengthOfPhrase(String phrase){
