@@ -62,7 +62,6 @@ public class UserAuthTest extends BaseTestCase {
         } else {
             throw new IllegalArgumentException("Condition value us know: "+ condition);
         }
-
         Response responseForCheck =  spec.get().andReturn();
         Assertions.asserJsonByName(responseForCheck, "user_id", 0);}
 }
