@@ -28,5 +28,9 @@ public class Assertions {
                 "Response code is not as expected"
         );
     }
+
+    public static void assertJsonHasKey (Response Response, String expectedFieldName){
+        Response.then().assertThat().body("$", hasKey(expectedFieldName));
+    }
 }
 
