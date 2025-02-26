@@ -13,3 +13,4 @@ public class Assertions {
         assertEquals(expectValue, value, "Json value is bor equal to expected value");
     }
 }
+
