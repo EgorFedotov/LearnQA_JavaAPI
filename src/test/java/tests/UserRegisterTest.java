@@ -18,10 +18,7 @@ public class UserRegisterTest extends BaseTestCase {
 
         Map<String, String> userData = new HashMap<>();
         userData.put("email", email);
-        userData.put("password", "123");
-        userData.put("username", "learnqa");
-        userData.put("firstName", "learnqa");
-        userData.put("lastName", "learnqa");
+        userData = DataGenerate.getRegistrationData(userData);
 
         Response responseCreateAuth = RestAssured
                 .given()
@@ -40,12 +37,7 @@ public class UserRegisterTest extends BaseTestCase {
     public void testCreateUser(){
         String email = DataGenerate.getRandomEmail();
 
-        Map<String, String> userData = new HashMap<>();
-        userData.put("email", email);
-        userData.put("password", "123");
-        userData.put("username", "learnqa");
-        userData.put("firstName", "learnqa");
-        userData.put("lastName", "learnqa");
+        Map<String, String> userData = DataGenerate.getRegistrationData();
 
         Response responseCreateAuth = RestAssured
                 .given()
@@ -54,6 +46,6 @@ public class UserRegisterTest extends BaseTestCase {
                 .andReturn();
 
         Assertions.assertResponseCodeEquals(responseCreateAuth, 200);
-        Assertions.assertJsonHasKey(responseCreateAuth, "id");
+        Assertions.assertJsonHasField(responseCreateAuth, "id");
     }
 }
