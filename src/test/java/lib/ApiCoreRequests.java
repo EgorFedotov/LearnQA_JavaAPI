@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static io.restassured.RestAssured.given;
@@ -63,6 +64,15 @@ public class ApiCoreRequests {
         return  given()
                 .filter(new AllureRestAssured())
                 .body(userData)
+                .post(url)
+                .andReturn();
+    }
+
+    @Step("user authorization")
+    public Response getAuth(String url, Map<String, String> authData){
+        return given()
+                .filter(new AllureRestAssured())
+                .body(authData)
                 .post(url)
                 .andReturn();
     }

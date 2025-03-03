@@ -2,6 +2,7 @@ package tests;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import lib.ApiCoreRequests;
 import lib.Assertions;
 import lib.BaseTestCase;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UserGetTest extends BaseTestCase {
+    private final ApiCoreRequests apiCoreRequests = new ApiCoreRequests();
 
     @Test
     public void testGetUserDataNotAuth(){
@@ -48,5 +50,28 @@ public class UserGetTest extends BaseTestCase {
 
         String[] expectedFields = {"username", "firstName", "lastName", "email"};
         Assertions.assertJsonHasFields(responseUserData, expectedFields);
+    }
+
+    @Test
+    public void testGetUsernameAnotherUser(){
+        Map<String, String> authData = new HashMap<>();
+        authData.put("email", "vinkotov@example.com");
+        authData.put("password", "1234");
+        String urlLogin = "https://playground.learnqa.ru/api/user/login";
+        String urlUser = "https://playground.learnqa.ru/api/user/3";
+
+        Response responseGetAuthData = apiCoreRequests
+                .getAuth(urlLogin,authData);
+
+        String token = this.getHeader(responseGetAuthData, "x-csrf-token");
+        String cookie = this.getCookie(responseGetAuthData, "auth_sid");
+
+        Response responseUserData = apiCoreRequests
+                .makeGetRequest(urlUser, token, cookie);
+
+        Assertions.assertJsonHasField(responseUserData, "username");
+        Assertions.assertJsonHasNotField(responseUserData, "firstName");
+        Assertions.assertJsonHasNotField(responseUserData, "lastName");
+        Assertions.assertJsonHasNotField(responseUserData, "email");
     }
 }
