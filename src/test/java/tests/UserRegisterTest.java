@@ -77,6 +77,7 @@ public class UserRegisterTest extends BaseTestCase {
             "egorfedotov@gmail.com,, usernameEgor, egor, fedotov",
             ",passwordsecret, usernameEgor, egor, fedotov"
     })
+
     public void testCreateUserWithoutOneOfField(String email, String password, String username, String firstName, String lastName){
         Map<String, String> userData = new HashMap<>();
         userData.put("email", email);
@@ -90,5 +91,20 @@ public class UserRegisterTest extends BaseTestCase {
 
         Assertions.assertResponseHasText(responseWithoutOneOfField, "The following required params are missed:");
         Assertions.assertResponseCodeEquals(responseWithoutOneOfField, 400);
+    }
+
+    @Test
+    public void testCreateUserWithShortName(){
+        String firstName = "1";
+        Map<String, String> userData = new HashMap<>();
+
+        userData.put("firstName", firstName);
+        userData = DataGenerate.getRegistrationData(userData);
+
+        Response responseWithShortName = apiCoreRequests
+                .createUser(url, userData);
+
+        Assertions.assertResponseHasText(responseWithShortName,"The value of 'firstName' field is too short");
+        Assertions.assertResponseCodeEquals(responseWithShortName, 400);
     }
 }
