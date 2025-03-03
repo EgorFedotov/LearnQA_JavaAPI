@@ -7,6 +7,8 @@ import lib.Assertions;
 import lib.BaseTestCase;
 import lib.DataGenerate;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,5 +67,28 @@ public class UserRegisterTest extends BaseTestCase {
 
         Assertions.assertResponseCodeEquals(responseCreateUserWithInvalidEmail, 400);
         Assertions.assertResponseTextEquals(responseCreateUserWithInvalidEmail, "Invalid email format");
+    }
+
+    @ParameterizedTest()
+    @CsvSource({
+            "egorfedotov@gmail.com,passwordsecret, usernameEgor, egor,",
+            "egorfedotov@gmail.com,passwordsecret, usernameEgor,, fedotov",
+            "egorfedotov@gmail.com,passwordsecret,, egor, fedotov",
+            "egorfedotov@gmail.com,, usernameEgor, egor, fedotov",
+            ",passwordsecret, usernameEgor, egor, fedotov"
+    })
+    public void testCreateUserWithoutOneOfField(String email, String password, String username, String firstName, String lastName){
+        Map<String, String> userData = new HashMap<>();
+        userData.put("email", email);
+        userData.put("password", password);
+        userData.put("username", username);
+        userData.put("firstName", firstName);
+        userData.put("lastName", lastName);
+
+        Response responseWithoutOneOfField = apiCoreRequests
+                .createUser(url, userData);
+
+        Assertions.assertResponseHasText(responseWithoutOneOfField, "The following required params are missed:");
+        Assertions.assertResponseCodeEquals(responseWithoutOneOfField, 400);
     }
 }

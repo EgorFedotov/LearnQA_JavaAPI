@@ -2,8 +2,7 @@ package lib;
 
 import io.restassured.response.Response;
 
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class Assertions {
@@ -51,6 +50,8 @@ public class Assertions {
         Response.then().assertThat().body("$", not(hasKey(unexpectedFieldNAme)));
     }
 
-
+    public static void assertResponseHasText(Response Response, String expectedText){
+        Response.then().assertThat().body(startsWith(expectedText));
+    }
 }
 
