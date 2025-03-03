@@ -48,4 +48,13 @@ public class ApiCoreRequests {
                 .post(url)
                 .andReturn();
     }
+
+    @Step("Create user with invalid email w/o @")
+    public Response createUserWithIncorrectEmail(String url, Map<String, String> userData){
+        return  given()
+                .filter(new AllureRestAssured())
+                .body(userData)
+                .post(url)
+                .andReturn();
+    }
 }
