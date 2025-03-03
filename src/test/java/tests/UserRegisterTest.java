@@ -35,7 +35,6 @@ public class UserRegisterTest extends BaseTestCase {
 
     @Test
     public void testCreateUser(){
-        String email = DataGenerate.getRandomEmail();
 
         Map<String, String> userData = DataGenerate.getRegistrationData();
 
