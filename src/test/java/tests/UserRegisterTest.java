@@ -107,4 +107,20 @@ public class UserRegisterTest extends BaseTestCase {
         Assertions.assertResponseHasText(responseWithShortName,"The value of 'firstName' field is too short");
         Assertions.assertResponseCodeEquals(responseWithShortName, 400);
     }
+
+    @Test
+    public void testCreateUserWithLongName(){
+        String firstName = "aZ9xLpQwEo2MvNt8Yd312321vewf234gvbgre1312yrhgfhbKHJBKJHmkl23n1lrfgBr5CgV1JKfXHmU67TAzWsO3qG0YkPLDjnFhRCb4vMZxy98NQtwEo2LpJfKXHmU67TAzWsO3qG0YkPLDjnFhRCb4vMZxy98NQtwEo2LpJfKXHmU67TAzWsO3qG0YkPLDjnFhRCb4vMZxy98NQtwEo2LpJfKXHmU67TAzWsO3qG0YkPLDjnFhRCb4vMZxy98NQtwEo2LpJfKXHmU67TAzW";
+
+        Map<String, String> userData = new HashMap<>();
+
+        userData.put("firstName", firstName);
+        userData = DataGenerate.getRegistrationData(userData);
+
+        Response responseWithLongName = apiCoreRequests
+                .createUser(url, userData);
+
+        Assertions.assertResponseHasText(responseWithLongName,"The value of 'firstName' field is too long");
+        Assertions.assertResponseCodeEquals(responseWithLongName, 400);
+    }
 }
