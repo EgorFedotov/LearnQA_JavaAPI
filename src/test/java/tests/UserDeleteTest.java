@@ -1,5 +1,9 @@
 package tests;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import lib.ApiCoreRequests;
@@ -7,11 +11,14 @@ import lib.Assertions;
 import lib.BaseTestCase;
 import lib.DataGenerate;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Epic("Тесты на удаление пользователя")
+@Story("User deleting")
 public class UserDeleteTest extends BaseTestCase {
 
     String url = "https://playground.learnqa.ru/api/";
@@ -31,6 +38,8 @@ public class UserDeleteTest extends BaseTestCase {
     }
 
     @Test
+    @Description("This test checks if it is impossible to delete the base user")
+    @DisplayName("Test negative delete base user")
     public void testDeleteUser2(){
         //login
         Response responseLogin = getLogin("vinkotov@example.com", "1234");
@@ -58,6 +67,8 @@ public class UserDeleteTest extends BaseTestCase {
 
 
     @Test
+    @Description("This test checks the ability to create and delete a user")
+    @DisplayName("Test positive delete user")
     public void testCreateAndThenDeleteUser(){
         //login
         Response responseLogin = getLogin(userData.get("email"), userData.get("password"));
@@ -77,6 +88,8 @@ public class UserDeleteTest extends BaseTestCase {
 
 
     @Test
+    @Description("Checking if a user has been deleted while being logged in by another user.")
+    @DisplayName("Test negative delete another user")
     public void testDeleteAnotherUser(){
         //login
         Response responseLogin = getLogin("vinkotov@example.com", "1234");

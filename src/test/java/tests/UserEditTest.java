@@ -1,5 +1,9 @@
 package tests;
 
+import io.qameta.allure.Description;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
+import io.qameta.allure.Story;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
@@ -8,11 +12,15 @@ import lib.Assertions;
 import lib.BaseTestCase;
 import lib.DataGenerate;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Epic("Edit user cases")
+@Feature("Editing")
+@Story("User editing")
 public class UserEditTest extends BaseTestCase {
     private final ApiCoreRequests apiCoreRequests = new ApiCoreRequests();
     String urlLogin = "https://playground.learnqa.ru/api/user/login";
@@ -78,6 +86,8 @@ public class UserEditTest extends BaseTestCase {
     }
 
     @Test
+    @Description("This test edit user by non-authorized")
+    @DisplayName("Test negative edit user: w/o authorization")
     public void testEditUserWithoutAuth(){
         String newName = "Change Name";
         Map<String, String> editData = new HashMap<>();
@@ -92,6 +102,8 @@ public class UserEditTest extends BaseTestCase {
     }
 
     @Test
+    @Description("This test edit user by other user")
+    @DisplayName("Test negative: edit user by other user")
     public void testEditAuthByAnotherUser(){
         //login
         Response responseLogin = getLogin("vinkotov@example.com", "1234", urlLogin);
@@ -104,6 +116,8 @@ public class UserEditTest extends BaseTestCase {
     }
 
     @Test
+    @Description("This test try to edit created user with wrong email")
+    @DisplayName("Test negative edit user: wrong email")
     public void testChangeEmail(){
         //login
         Response responseGetAuth = getLogin(userData.get("email"), userData.get("password"), urlLogin);
@@ -116,6 +130,8 @@ public class UserEditTest extends BaseTestCase {
     }
 
     @Test
+    @Description("This test try to edit created user with short firstName")
+    @DisplayName("Test negative edit user: short firstName")
     public void testChangeFirstNameShortPhrase(){
         //login
         Response responseGetAuth = getLogin(userData.get("email"), userData.get("password"), urlLogin);
