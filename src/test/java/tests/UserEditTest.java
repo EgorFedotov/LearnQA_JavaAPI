@@ -144,7 +144,6 @@ public class UserEditTest extends BaseTestCase {
     @Test
     public void testChangeFirstNameShortPhrase(){
         //login
-        String urlLogin = "https://playground.learnqa.ru/api/user/login";
         Map<String,String> authData = new HashMap<>();
         authData.put("email", userData.get("email"));
         authData.put("password", userData.get("password"));
