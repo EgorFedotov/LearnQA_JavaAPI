@@ -7,6 +7,7 @@ import lib.ApiCoreRequests;
 import lib.Assertions;
 import lib.BaseTestCase;
 import lib.DataGenerate;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -14,6 +15,19 @@ import java.util.Map;
 
 public class UserEditTest extends BaseTestCase {
     private final ApiCoreRequests apiCoreRequests = new ApiCoreRequests();
+    String urlLogin = "https://playground.learnqa.ru/api/user/login";
+    String urlUser = "https://playground.learnqa.ru/api/user/";
+    Map<String, String> userData;
+    JsonPath responseCreateAuth;
+    String userId;
+
+    @BeforeEach
+    public void generateUser(){
+        this.userData = DataGenerate.getRegistrationData();
+        this.responseCreateAuth = apiCoreRequests
+                .makePostRequestJsonResponse(urlUser, userData);
+        this.userId =responseCreateAuth.getString("id");
+    }
 
     @Test
     public void testEditJustCreatedTest(){
@@ -65,7 +79,6 @@ public class UserEditTest extends BaseTestCase {
 
     @Test
     public void testEditUserWithoutAuth(){
-        String urlUser = "https://playground.learnqa.ru/api/user/2";
         String newName = "Change Name";
         Map<String, String> editData = new HashMap<>();
         editData.put("firstName", newName);
@@ -80,7 +93,6 @@ public class UserEditTest extends BaseTestCase {
     @Test
     public void testEditAuthByAnotherUser(){
         //login
-        String urlLogin = "https://playground.learnqa.ru/api/user/login";
         Map <String, String> authData = new HashMap<>();
         authData.put("email", "vinkotov@example.com");
         authData.put("password", "1234");
@@ -88,16 +100,16 @@ public class UserEditTest extends BaseTestCase {
         Response responseLogin = apiCoreRequests
                 .makePostRequest(urlLogin, authData);
 
-        String token = responseLogin.getHeader("x-csrf-token");
-        String cookie = responseLogin.getCookie("auth_sid");
-
         //edit data of another user
-        String urlEdit = "https://playground.learnqa.ru/api/user/5";
         String newName = "Change Name";
         Map<String, String> editData = new HashMap<>();
         editData.put("firstName", newName);
         Response responseEditUser = apiCoreRequests
-                .makePutRequestWithAuth(urlEdit, token, cookie, editData);
+                .makePutRequestWithAuth(
+                        urlUser+"5",
+                        this.getHeader(responseLogin, "x-csrf-token"),
+                        this.getCookie(responseLogin, "auth_sid"),
+                        editData);
 
         Assertions.assertResponseCodeEquals(responseEditUser, 400);
         Assertions.assertJsonHasField(responseEditUser,"error");
@@ -105,14 +117,6 @@ public class UserEditTest extends BaseTestCase {
 
     @Test
     public void testChangeEmail(){
-        //Generate user
-        String url = "https://playground.learnqa.ru/api/user/";
-        Map<String, String> userData = DataGenerate.getRegistrationData();
-        JsonPath responseCreateAuth = apiCoreRequests
-                .makePostRequestJsonResponse(url, userData);
-
-        String userId = responseCreateAuth.getString("id");
-
         //login
         String urlLogin = "https://playground.learnqa.ru/api/user/login";
         Map<String,String> authData = new HashMap<>();
@@ -122,16 +126,16 @@ public class UserEditTest extends BaseTestCase {
         Response responseGetAuth = apiCoreRequests
                 .makePostRequest(urlLogin, authData);
 
-        String token = responseGetAuth.getHeader("x-csrf-token");
-        String cookie = responseGetAuth.getCookie("auth_sid");
-
         //edit data
         String editEmail = "testIncorrectEmailgmail.ru";
         Map <String, String> editData = new HashMap<>();
         editData.put("email", editEmail);
 
         Response responseEditUser = apiCoreRequests
-                .makePutRequestWithAuth("https://playground.learnqa.ru/api/user/"+userId, token, cookie, editData);
+                .makePutRequestWithAuth(urlUser+userId,
+                        this.getHeader(responseGetAuth, "x-csrf-token"),
+                        this.getCookie(responseGetAuth, "auth_sid"),
+                        editData);
 
         Assertions.assertResponseCodeEquals(responseEditUser, 400);
         Assertions.assertJsonHasField(responseEditUser,"error");
@@ -139,14 +143,6 @@ public class UserEditTest extends BaseTestCase {
 
     @Test
     public void testChangeFirstNameShortPhrase(){
-        //Generate user
-        String url = "https://playground.learnqa.ru/api/user/";
-        Map<String, String> userData = DataGenerate.getRegistrationData();
-        JsonPath responseCreateAuth = apiCoreRequests
-                .makePostRequestJsonResponse(url, userData);
-
-        String userId = responseCreateAuth.getString("id");
-
         //login
         String urlLogin = "https://playground.learnqa.ru/api/user/login";
         Map<String,String> authData = new HashMap<>();
@@ -160,16 +156,19 @@ public class UserEditTest extends BaseTestCase {
         String cookie = responseGetAuth.getCookie("auth_sid");
 
         //Edit
-        String urlEdit = "https://playground.learnqa.ru/api/user/"+userId;
         String firstName = "a";
         Map<String, String> editData = new HashMap<>();
         editData.put("firstName", firstName);
 
         Response responseEditUser = apiCoreRequests
-                .makePutRequestWithAuth(urlEdit, token, cookie, editData);
+                .makePutRequestWithAuth(urlUser+userId,
+                        this.getHeader(responseGetAuth, "x-csrf-token"),
+                        this.getCookie(responseGetAuth, "auth_sid"),
+                        editData);
 
         Assertions.assertResponseCodeEquals(responseEditUser, 400);
         Assertions.assertJsonHasField(responseEditUser,"error");
+        System.out.println(responseEditUser.asString());
     }
 }
 
