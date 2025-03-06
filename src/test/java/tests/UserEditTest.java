@@ -105,13 +105,11 @@ public class UserEditTest extends BaseTestCase {
 
     @Test
     public void testChangeEmail(){
-        //GENERATE USER
+        //Generate user
+        String url = "https://playground.learnqa.ru/api/user/";
         Map<String, String> userData = DataGenerate.getRegistrationData();
-        JsonPath responseCreateAuth = RestAssured
-                .given()
-                .body(userData)
-                .post("https://playground.learnqa.ru/api/user/")
-                .jsonPath();
+        JsonPath responseCreateAuth = apiCoreRequests
+                .makePostRequestJsonResponse(url, userData);
 
         String userId = responseCreateAuth.getString("id");
 
@@ -139,6 +137,39 @@ public class UserEditTest extends BaseTestCase {
         Assertions.assertJsonHasField(responseEditUser,"error");
     }
 
+    @Test
+    public void testChangeFirstNameShortPhrase(){
+        //Generate user
+        String url = "https://playground.learnqa.ru/api/user/";
+        Map<String, String> userData = DataGenerate.getRegistrationData();
+        JsonPath responseCreateAuth = apiCoreRequests
+                .makePostRequestJsonResponse(url, userData);
 
+        String userId = responseCreateAuth.getString("id");
+
+        //login
+        String urlLogin = "https://playground.learnqa.ru/api/user/login";
+        Map<String,String> authData = new HashMap<>();
+        authData.put("email", userData.get("email"));
+        authData.put("password", userData.get("password"));
+
+        Response responseGetAuth = apiCoreRequests
+                .makePostRequest(urlLogin, authData);
+
+        String token = responseGetAuth.getHeader("x-csrf-token");
+        String cookie = responseGetAuth.getCookie("auth_sid");
+
+        //Edit
+        String urlEdit = "https://playground.learnqa.ru/api/user/"+userId;
+        String firstName = "a";
+        Map<String, String> editData = new HashMap<>();
+        editData.put("firstName", firstName);
+
+        Response responseEditUser = apiCoreRequests
+                .makePutRequestWithAuth(urlEdit, token, cookie, editData);
+
+        Assertions.assertResponseCodeEquals(responseEditUser, 400);
+        Assertions.assertJsonHasField(responseEditUser,"error");
+    }
 }
 
