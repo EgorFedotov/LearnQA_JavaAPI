@@ -71,9 +71,35 @@ public class UserEditTest extends BaseTestCase {
         editData.put("firstName", newName);
 
         Response responseEditUserWithoutAuth = apiCoreRequests
-                .editUserWithoutAuth(urlUser, editData);
+                .makePutRequest(urlUser, editData);
 
         Assertions.assertResponseCodeEquals(responseEditUserWithoutAuth, 400);
         Assertions.assertJsonHasField(responseEditUserWithoutAuth,"error");
+    }
+
+    @Test
+    public void testEditAuthByAnotherUser(){
+        //login
+        String urlLogin = "https://playground.learnqa.ru/api/user/login";
+        Map <String, String> authData = new HashMap<>();
+        authData.put("email", "vinkotov@example.com");
+        authData.put("password", "1234");
+
+        Response responseLogin = apiCoreRequests
+                .makePostRequest(urlLogin, authData);
+
+        String token = responseLogin.getHeader("x-csrf-token");
+        String cookie = responseLogin.getCookie("auth_sid");
+
+        //edit data of another user
+        String urlEdit = "https://playground.learnqa.ru/api/user/5";
+        String newName = "Change Name";
+        Map<String, String> editData = new HashMap<>();
+        editData.put("firstName", newName);
+        Response responseEditUser = apiCoreRequests
+                .makePutRequestWithAuth(urlEdit, token, cookie, editData);
+
+        Assertions.assertResponseCodeEquals(responseEditUser, 400);
+        Assertions.assertJsonHasField(responseEditUser,"error");
     }
 }

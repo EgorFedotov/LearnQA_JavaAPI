@@ -58,7 +58,7 @@ public class UserGetTest extends BaseTestCase {
         authData.put("email", "vinkotov@example.com");
         authData.put("password", "1234");
         String urlLogin = "https://playground.learnqa.ru/api/user/login";
-        String urlUser = "https://playground.learnqa.ru/api/user/3";
+        String urlUser = "https://playground.learnqa.ru/api/user/5";
 
         Response responseGetAuthData = apiCoreRequests
                 .getAuth(urlLogin,authData);
