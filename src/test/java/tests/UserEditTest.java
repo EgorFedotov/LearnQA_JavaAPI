@@ -3,6 +3,7 @@ package tests;
 import io.restassured.RestAssured;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
+import lib.ApiCoreRequests;
 import lib.Assertions;
 import lib.BaseTestCase;
 import lib.DataGenerate;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UserEditTest extends BaseTestCase {
+    private final ApiCoreRequests apiCoreRequests = new ApiCoreRequests();
 
     @Test
     public void testEditJustCreatedTest(){
@@ -59,5 +61,19 @@ public class UserEditTest extends BaseTestCase {
                 .andReturn();
 
         Assertions.asserJsonByName(responseUserData, "firstName", newName);
+    }
+
+    @Test
+    public void testEditUserWithoutAuth(){
+        String urlUser = "https://playground.learnqa.ru/api/user/2";
+        String newName = "Change Name";
+        Map<String, String> editData = new HashMap<>();
+        editData.put("firstName", newName);
+
+        Response responseEditUserWithoutAuth = apiCoreRequests
+                .editUserWithoutAuth(urlUser, editData);
+
+        Assertions.assertResponseCodeEquals(responseEditUserWithoutAuth, 400);
+        Assertions.assertJsonHasField(responseEditUserWithoutAuth,"error");
     }
 }
