@@ -33,12 +33,7 @@ public class UserDeleteTest extends BaseTestCase {
     @Test
     public void testDeleteUser2(){
         //login
-        Map<String, String> authData = new HashMap<>();
-        authData.put("email", "vinkotov@example.com");
-        authData.put("password", "1234");
-
-        Response responseLogin = apiCoreRequests
-                .makePostRequest(urlLogin, authData);
+        Response responseLogin = getLogin("vinkotov@example.com", "1234");
 
         //delete user
         Response responseDeleteUser = apiCoreRequests
@@ -61,64 +56,64 @@ public class UserDeleteTest extends BaseTestCase {
         Assertions.asserJsonByName(responseUserData, "id", "2");
     }
 
+
     @Test
     public void testCreateAndThenDeleteUser(){
         //login
-        Map<String,String> authData = new HashMap<>();
-        authData.put("email", userData.get("email"));
-        authData.put("password", userData.get("password"));
-
-        Response responseLogin = apiCoreRequests
-                .makePostRequest(urlLogin, authData);
+        Response responseLogin = getLogin(userData.get("email"), userData.get("password"));
 
         //delete user
-        Response responseDeleteUser = apiCoreRequests
-                .makeDeleteRequest(url+"user/"+userId,
-                        this.getHeader(responseLogin, "x-csrf-token"),
-                        this.getCookie(responseLogin, "auth_sid"));
+        Response responseDeleteUser = getDeleteUser(responseLogin);
 
         Assertions.assertResponseCodeEquals(responseDeleteUser, 200);
         Assertions.assertJsonHasField(responseDeleteUser,"success");
 
         //check delete user
-        Response responseCheckDeleteUser = apiCoreRequests
-                .makeGetRequest(
-                        url+"user/"+userId,
-                        this.getHeader(responseLogin, "x-csrf-token"),
-                        this.getCookie(responseLogin, "auth_sid"));
+        Response responseCheckDeleteUser = getCheckDeleteUser(responseLogin);
 
         Assertions.assertResponseCodeEquals(responseCheckDeleteUser, 404);
         Assertions.assertResponseHasText(responseCheckDeleteUser, "User not found");
     }
 
+
     @Test
     public void testDeleteAnotherUser(){
         //login
-        Map<String, String> authData = new HashMap<>();
-        authData.put("email", "vinkotov@example.com");
-        authData.put("password", "1234");
-
-        Response responseLogin = apiCoreRequests
-                .makePostRequest(urlLogin, authData);
-
+        Response responseLogin = getLogin("vinkotov@example.com", "1234");
         //delete user
-        Response responseDeleteUser = apiCoreRequests
-                .makeDeleteRequest(url+"user/"+userId,
-                        this.getHeader(responseLogin, "x-csrf-token"),
-                        this.getCookie(responseLogin, "auth_sid"));
+        Response responseDeleteUser = getDeleteUser(responseLogin);
 
         Assertions.assertResponseCodeEquals(responseDeleteUser, 400);
         Assertions.assertJsonHasField(responseDeleteUser,"error");
 
         //check delete user
-        Response responseCheckDeleteUser = apiCoreRequests
+        Response responseCheckDeleteUser = getCheckDeleteUser(responseLogin);
+
+        Assertions.assertResponseCodeEquals(responseCheckDeleteUser, 200);
+        Assertions.assertJsonHasField(responseCheckDeleteUser,"username");
+    }
+
+    private Response getLogin(String mail, String number) {
+        Map<String, String> authData = new HashMap<>();
+        authData.put("email", mail);
+        authData.put("password", number);
+
+        return apiCoreRequests
+                .makePostRequest(urlLogin, authData);
+    }
+
+    private Response getDeleteUser(Response responseLogin) {
+        return apiCoreRequests
+                .makeDeleteRequest(url+"user/"+userId,
+                        this.getHeader(responseLogin, "x-csrf-token"),
+                        this.getCookie(responseLogin, "auth_sid"));
+    }
+
+    private Response getCheckDeleteUser(Response responseLogin) {
+        return apiCoreRequests
                 .makeGetRequest(
                         url+"user/"+userId,
                         this.getHeader(responseLogin, "x-csrf-token"),
                         this.getCookie(responseLogin, "auth_sid"));
-
-        System.out.println(responseCheckDeleteUser.asString());
-        Assertions.assertResponseCodeEquals(responseCheckDeleteUser, 200);
-        Assertions.assertJsonHasField(responseCheckDeleteUser,"username");
     }
 }

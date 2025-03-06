@@ -84,32 +84,20 @@ public class UserEditTest extends BaseTestCase {
         editData.put("firstName", newName);
 
         Response responseEditUserWithoutAuth = apiCoreRequests
-                .makePutRequest(urlUser, editData);
+                .makePutRequest(urlUser+userId, editData);
 
         Assertions.assertResponseCodeEquals(responseEditUserWithoutAuth, 400);
         Assertions.assertJsonHasField(responseEditUserWithoutAuth,"error");
+
     }
 
     @Test
     public void testEditAuthByAnotherUser(){
         //login
-        Map <String, String> authData = new HashMap<>();
-        authData.put("email", "vinkotov@example.com");
-        authData.put("password", "1234");
-
-        Response responseLogin = apiCoreRequests
-                .makePostRequest(urlLogin, authData);
+        Response responseLogin = getLogin("vinkotov@example.com", "1234", urlLogin);
 
         //edit data of another user
-        String newName = "Change Name";
-        Map<String, String> editData = new HashMap<>();
-        editData.put("firstName", newName);
-        Response responseEditUser = apiCoreRequests
-                .makePutRequestWithAuth(
-                        urlUser+"5",
-                        this.getHeader(responseLogin, "x-csrf-token"),
-                        this.getCookie(responseLogin, "auth_sid"),
-                        editData);
+        Response responseEditUser = getEditUser("Change Name", "firstName", "5", responseLogin);
 
         Assertions.assertResponseCodeEquals(responseEditUser, 400);
         Assertions.assertJsonHasField(responseEditUser,"error");
@@ -118,24 +106,10 @@ public class UserEditTest extends BaseTestCase {
     @Test
     public void testChangeEmail(){
         //login
-        String urlLogin = "https://playground.learnqa.ru/api/user/login";
-        Map<String,String> authData = new HashMap<>();
-        authData.put("email", userData.get("email"));
-        authData.put("password", userData.get("password"));
-
-        Response responseGetAuth = apiCoreRequests
-                .makePostRequest(urlLogin, authData);
+        Response responseGetAuth = getLogin(userData.get("email"), userData.get("password"), urlLogin);
 
         //edit data
-        String editEmail = "testIncorrectEmailgmail.ru";
-        Map <String, String> editData = new HashMap<>();
-        editData.put("email", editEmail);
-
-        Response responseEditUser = apiCoreRequests
-                .makePutRequestWithAuth(urlUser+userId,
-                        this.getHeader(responseGetAuth, "x-csrf-token"),
-                        this.getCookie(responseGetAuth, "auth_sid"),
-                        editData);
+        Response responseEditUser = getEditUser("testIncorrectEmailgmail.ru", "email", userId, responseGetAuth);
 
         Assertions.assertResponseCodeEquals(responseEditUser, 400);
         Assertions.assertJsonHasField(responseEditUser,"error");
@@ -144,30 +118,33 @@ public class UserEditTest extends BaseTestCase {
     @Test
     public void testChangeFirstNameShortPhrase(){
         //login
-        Map<String,String> authData = new HashMap<>();
-        authData.put("email", userData.get("email"));
-        authData.put("password", userData.get("password"));
-
-        Response responseGetAuth = apiCoreRequests
-                .makePostRequest(urlLogin, authData);
-
-        String token = responseGetAuth.getHeader("x-csrf-token");
-        String cookie = responseGetAuth.getCookie("auth_sid");
+        Response responseGetAuth = getLogin(userData.get("email"), userData.get("password"), urlLogin);
 
         //Edit
-        String firstName = "a";
-        Map<String, String> editData = new HashMap<>();
-        editData.put("firstName", firstName);
-
-        Response responseEditUser = apiCoreRequests
-                .makePutRequestWithAuth(urlUser+userId,
-                        this.getHeader(responseGetAuth, "x-csrf-token"),
-                        this.getCookie(responseGetAuth, "auth_sid"),
-                        editData);
+        Response responseEditUser = getEditUser("a", "firstName", userId, responseGetAuth);
 
         Assertions.assertResponseCodeEquals(responseEditUser, 400);
         Assertions.assertJsonHasField(responseEditUser,"error");
-        System.out.println(responseEditUser.asString());
+    }
+
+    private Response getLogin(String mail, String number, String urlLogin) {
+        Map<String, String> authData = new HashMap<>();
+        authData.put("email", mail);
+        authData.put("password", number);
+
+        return apiCoreRequests
+                .makePostRequest(urlLogin, authData);
+    }
+
+    private Response getEditUser(String newChangeData, String changeData, String number, Response responseLogin) {
+        Map<String, String> editData = new HashMap<>();
+        editData.put(changeData, newChangeData);
+        return apiCoreRequests
+                .makePutRequestWithAuth(
+                        urlUser + number,
+                        this.getHeader(responseLogin, "x-csrf-token"),
+                        this.getCookie(responseLogin, "auth_sid"),
+                        editData);
     }
 }
 
