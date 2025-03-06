@@ -102,4 +102,43 @@ public class UserEditTest extends BaseTestCase {
         Assertions.assertResponseCodeEquals(responseEditUser, 400);
         Assertions.assertJsonHasField(responseEditUser,"error");
     }
+
+    @Test
+    public void testChangeEmail(){
+        //GENERATE USER
+        Map<String, String> userData = DataGenerate.getRegistrationData();
+        JsonPath responseCreateAuth = RestAssured
+                .given()
+                .body(userData)
+                .post("https://playground.learnqa.ru/api/user/")
+                .jsonPath();
+
+        String userId = responseCreateAuth.getString("id");
+
+        //login
+        String urlLogin = "https://playground.learnqa.ru/api/user/login";
+        Map<String,String> authData = new HashMap<>();
+        authData.put("email", userData.get("email"));
+        authData.put("password", userData.get("password"));
+
+        Response responseGetAuth = apiCoreRequests
+                .makePostRequest(urlLogin, authData);
+
+        String token = responseGetAuth.getHeader("x-csrf-token");
+        String cookie = responseGetAuth.getCookie("auth_sid");
+
+        //edit data
+        String editEmail = "testIncorrectEmailgmail.ru";
+        Map <String, String> editData = new HashMap<>();
+        editData.put("email", editEmail);
+
+        Response responseEditUser = apiCoreRequests
+                .makePutRequestWithAuth("https://playground.learnqa.ru/api/user/"+userId, token, cookie, editData);
+
+        Assertions.assertResponseCodeEquals(responseEditUser, 400);
+        Assertions.assertJsonHasField(responseEditUser,"error");
+    }
+
+
 }
+
